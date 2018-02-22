@@ -1,0 +1,22 @@
+{
+  "name": "cubesolver",
+  "version": "0.0.1",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kai-wang/cubesolver.git"
+  },
+  "author": "Kai Wang",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kai-wang/cubesolver/issues"
+  },
+  "homepage": "https://github.com/kai-wang/cubesolver#readme",
+  "dependencies": {
+    "graphlib": "^2.1.5"
+  }
+}

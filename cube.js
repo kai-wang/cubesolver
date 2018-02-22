@@ -13,72 +13,172 @@ const colors = {
 
 const surfaces = ["Front", "Back", "Left", "Right", "Up", "Bottom"];
 
-function rotate_up_left(arr) {
-  var result = _.cloneDeep(arr);
-  var tmp = result.Front[0];
-
-  result.Front[0] = result.Right[0];
-  result.Right[0] = result.Back[0];
-  result.Back[0] = result.Left[0];
-  result.Left[0] = tmp;
-
-  // upper surface rotate right
-  result.Up[0] = arr.Up[2][0] + arr.Up[1][0] + arr.Up[0][0];
-  result.Up[1] = arr.Up[2][1] + arr.Up[1][1] + arr.Up[0][1];
-  result.Up[2] = arr.Up[2][2] + arr.Up[1][2] + arr.Up[0][2];
-
-  return result;
+// rotate the upper layer clockwise -- right side comes to front
+function rotate_up_cw(arr) {
+  return {
+    "Front":  [ arr.Right[0], arr.Front[1], arr.Front[2] ],
+    "Back":   [ arr.Left[0], arr.Back[1], arr.Back[2] ],
+    "Left":   [ arr.Front[0], arr.Left[1], arr.Left[2] ],
+    "Right":  [ arr.Back[0], arr.Right[1], arr.Right[2] ],
+    "Up":     [ arr.Up[2][0] + arr.Up[1][0] + arr.Up[0][0],
+                arr.Up[2][1] + arr.Up[1][1] + arr.Up[0][1],
+                arr.Up[2][2] + arr.Up[1][2] + arr.Up[0][2]
+              ],
+    "Bottom": [ arr.Bottom[0], arr.Bottom[1], arr.Bottom[2] ]
+  }
 }
 
-function rotate_up_right(arr) {
-  var result = _.cloneDeep(arr);
-  var tmp = result.Front[0];
-
-  result.Front[0] = result.Left[0];
-  result.Left[0] = result.Back[0];
-  result.Back[0] = result.Right[0];
-  result.Right[0] = tmp;
-
-  // upper surface rotate left
-  result.Up[0] = arr.Up[0][2] + arr.Up[1][2] + arr.Up[2][2];
-  result.Up[1] = arr.Up[0][1] + arr.Up[1][1] + arr.Up[2][1];
-  result.Up[2] = arr.Up[0][0] + arr.Up[1][0] + arr.Up[2][0];
-
-  return result;
+// rotate the upper layer counter clockwise - left side comes to front
+function rotate_up_ccw(arr) {
+  return {
+    "Front":  [ arr.Left[0], arr.Front[1], arr.Front[2] ],
+    "Back":   [ arr.Right[0],  arr.Back[1],  arr.Back[2] ],
+    "Left":   [ arr.Back[0], arr.Left[1],  arr.Left[2] ],
+    "Right":  [ arr.Front[0],  arr.Right[1], arr.Right[2] ],
+    "Up":     [ arr.Up[0][2] + arr.Up[1][2] + arr.Up[2][2],
+                arr.Up[0][1] + arr.Up[1][1] + arr.Up[2][1],
+                arr.Up[0][0] + arr.Up[1][0] + arr.Up[2][0]
+              ],
+    "Bottom": [ arr.Bottom[0], arr.Bottom[1], arr.Bottom[2] ]
+  }
 }
 
-function rotate_bottom_left(arr) {
-  var result = _.cloneDeep(arr);
-  var tmp = result.Front[2];
-
-  result.Front[2] = result.Right[2];
-  result.Right[2] = result.Back[2];
-  result.Back[2] = result.Left[2];
-  result.Left[2] = tmp;
-
-  // Bottom surface rotate left
-  result.Bottom[0] = arr.Bottom[0][2] + arr.Bottom[1][2] + arr.Bottom[2][2];
-  result.Bottom[1] = arr.Bottom[0][1] + arr.Bottom[1][1] + arr.Bottom[2][1];
-  result.Bottom[2] = arr.Bottom[0][0] + arr.Bottom[1][0] + arr.Bottom[2][0];
-
-  return result;
+// rotate the bottom layer clockwise -- right side comes to front
+function rotate_bottom_cw(arr) {
+  return {
+    "Front":  [ arr.Front[0], arr.Front[1], arr.Right[2] ],
+    "Back":   [ arr.Back[0], arr.Back[1], arr.Left[2] ],
+    "Left":   [ arr.Left[0], arr.Left[1], arr.Front[2] ],
+    "Right":  [ arr.Right[0], arr.Right[1], arr.Back[2] ],
+    "Bottom": [ arr.Bottom[0][2] + arr.Bottom[1][2] + arr.Bottom[2][2],
+                arr.Bottom[0][1] + arr.Bottom[1][1] + arr.Bottom[2][1],
+                arr.Bottom[0][0] + arr.Bottom[1][0] + arr.Bottom[2][0]
+              ],
+    "Up":     [ arr.Up[0], arr.Up[1], arr.Up[2] ]
+  }
 }
 
-function rotate_bottom_right(arr) {
-  var result = _.cloneDeep(arr);
-  var tmp = result.Front[2];
+// rotate the bottom layer counter clockwise -- left side comes to front
+function rotate_bottom_ccw(arr) {
+  return {
+    "Front":  [ arr.Front[0], arr.Front[1], arr.Left[2] ],
+    "Back":   [ arr.Back[0], arr.Back[1], arr.Right[2] ],
+    "Left":   [ arr.Left[0], arr.Left[1], arr.Back[2] ],
+    "Right":  [ arr.Right[0], arr.Right[1], arr.Front[2] ],
+    "Bottom": [ arr.Bottom[2][0] + arr.Bottom[1][0] + arr.Bottom[0][0],
+                arr.Bottom[2][1] + arr.Bottom[1][1] + arr.Bottom[0][1],
+                arr.Bottom[2][2] + arr.Bottom[1][2] + arr.Bottom[0][2]
+              ],
+    "Up":     [ arr.Up[0], arr.Up[1], arr.Up[2] ]
+  }
+}
 
-  result.Front[2] = result.Left[2];
-  result.Left[2] = result.Back[2];
-  result.Back[2] = result.Right[2];
-  result.Right[2] = tmp;
+// rotate the right layer clockwise -- bottom side comes to front
+function rotate_right_cw(arr) {
+  return {
+    "Front":  [ arr.Front[0][0] + arr.Front[0][1] + arr.Bottom[0][2],
+                arr.Front[1][0] + arr.Front[1][1] + arr.Bottom[1][2],
+                arr.Front[2][0] + arr.Front[2][1] + arr.Bottom[2][2]
+              ],
+    "Back":   [ arr.Up[2][2] + arr.Back[0][1] + arr.Back[0][2],
+                arr.Up[1][2] + arr.Back[1][1] + arr.Back[1][2],
+                arr.Up[0][2] + arr.Back[2][1] + arr.Back[2][2]
+              ],
+    "Left":   [ arr.Left[0], arr.Left[1], arr.Back[2] ],
+    "Right":  [ arr.Right[2][0] + arr.Right[1][0] + arr.Right[0][0],
+                arr.Right[2][1] + arr.Right[1][1] + arr.Right[0][1],
+                arr.Right[2][2] + arr.Right[1][2] + arr.Right[0][2]
+              ],
+    "Bottom": [ arr.Bottom[0][0] + arr.Bottom[0][1] + arr.Back[2][0],
+                arr.Bottom[1][0] + arr.Bottom[1][1] + arr.Back[1][0],
+                arr.Bottom[2][0] + arr.Bottom[2][1] + arr.Back[0][0]
+              ],
+    "Up":     [ arr.Up[0][0] + arr.Up[0][1] + arr.Front[0][2],
+                arr.Up[1][0] + arr.Up[1][1] + arr.Front[1][2],
+                arr.Up[2][0] + arr.Up[2][1] + arr.Front[2][2]
+              ]
+  }
+}
 
-  // Bottom surface rotate right
-  result.Bottom[0] = arr.Bottom[2][0] + arr.Bottom[1][0] + arr.Bottom[0][0];
-  result.Bottom[1] = arr.Bottom[2][1] + arr.Bottom[1][1] + arr.Bottom[0][1];
-  result.Bottom[2] = arr.Bottom[2][2] + arr.Bottom[1][2] + arr.Bottom[0][2];
+// rotate the right layer counter clockwise -- up side comes to front
+function rotate_right_ccw(arr) {
+  return {
+    "Front":  [ arr.Front[0][0] + arr.Front[0][1] + arr.Up[0][2],
+                arr.Front[1][0] + arr.Front[1][1] + arr.Up[1][2],
+                arr.Front[2][0] + arr.Front[2][1] + arr.Up[2][2]
+              ],
+    "Back":   [ arr.Bottom[2][2] + arr.Back[0][1] + arr.Back[0][2],
+                arr.Bottom[1][2] + arr.Back[1][1] + arr.Back[1][2],
+                arr.Bottom[0][2] + arr.Back[2][1] + arr.Back[2][2]
+              ],
+    "Left":   [ arr.Left[0], arr.Left[1], arr.Back[2] ],
+    "Right":  [ arr.Right[0][2] + arr.Right[1][2] + arr.Right[2][2],
+                arr.Right[0][1] + arr.Right[1][1] + arr.Right[2][1],
+                arr.Right[0][0] + arr.Right[1][0] + arr.Right[2][0]
+              ],
+    "Bottom": [ arr.Bottom[0][0] + arr.Bottom[0][1] + arr.Front[0][2],
+                arr.Bottom[1][0] + arr.Bottom[1][1] + arr.Front[1][2],
+                arr.Bottom[2][0] + arr.Bottom[2][1] + arr.Front[2][2]
+              ],
+    "Up":     [ arr.Up[0][0] + arr.Up[0][1] + arr.Back[2][0],
+                arr.Up[1][0] + arr.Up[1][1] + arr.Back[1][0],
+                arr.Up[2][0] + arr.Up[2][1] + arr.Back[0][0]
+              ]
+  }
+}
 
-  return result;
+// rotate the left layer counter clockwise -- bottom side comes to front
+function rotate_left_ccw(arr) {
+  return {
+    "Front":  [ arr.Bttom[0][0] + arr.Front[0][1] + arr.Front[0][2],
+                arr.Bttom[1][0] + arr.Front[1][1] + arr.Front[1][2],
+                arr.Bttom[2][0] + arr.Front[2][1] + arr.Front[2][2]
+              ],
+    "Back":   [ arr.Back[0][0] + arr.Back[0][1] + arr.Up[2][0],
+                arr.Back[1][0] + arr.Back[1][1] + arr.Up[1][0],
+                arr.Back[2][0] + arr.Back[2][1] + arr.Up[0][0]
+              ],
+    "Left":   [ arr.Left[0][2] + arr.Left[1][2] + arr.Left[2][2],
+                arr.Left[0][1] + arr.Left[1][1] + arr.Left[2][1],
+                arr.Left[0][0] + arr.Left[1][0] + arr.Left[2][0]
+              ],
+    "Right":   [ arr.Right[0], arr.Right[1], arr.Right[2] ],
+    "Bottom": [ arr.Back[2][2] + arr.Bottom[0][1] + arr.Bottom[0][2],
+                arr.Back[1][2] + arr.Bottom[1][1] + arr.Bottom[1][2],
+                arr.Back[0][2] + arr.Bottom[2][1] + arr.Bottom[2][2]
+              ],
+    "Up":     [ arr.Up[0][0] + arr.Up[0][1] + arr.Front[0][2],
+                arr.Up[1][0] + arr.Up[1][1] + arr.Front[1][2],
+                arr.Up[2][0] + arr.Up[2][1] + arr.Front[2][2]
+              ]
+  }
+}
+
+// rotate the left layer clockwise -- up side comes to front
+function rotate_left_cw(arr) {
+  return {
+    "Front":  [ arr.Up[0][0] + arr.Front[0][1] + arr.Front[0][2],
+                arr.Up[1][0] + arr.Front[1][1] + arr.Front[1][2],
+                arr.Up[2][0] + arr.Front[2][1] + arr.Front[2][2]
+              ],
+    "Back":   [ arr.Back[0][0] + arr.Back[0][1] + arr.Bottom[2][0],
+                arr.Back[1][0] + arr.Back[1][1] + arr.Bottom[1][0],
+                arr.Back[2][0] + arr.Back[2][1] + arr.Bottom[0][0]
+              ],
+    "Left":   [ arr.Left[2][0] + arr.Left[1][0] + arr.Left[0][0],
+                arr.Left[2][1] + arr.Left[1][1] + arr.Left[0][1],
+                arr.Left[2][2] + arr.Left[1][2] + arr.Left[0][2]
+              ],
+    "Right":   [ arr.Right[0], arr.Right[1], arr.Right[2] ],
+    "Bottom": [ arr.Front[0][0] + arr.Bottom[0][1] + arr.Bottom[0][2],
+                arr.Front[1][0] + arr.Bottom[1][1] + arr.Bottom[1][2],
+                arr.Front[2][0] + arr.Bottom[2][1] + arr.Bottom[2][2]
+              ],
+    "Up":     [ arr.Back[2][2] + arr.Up[0][1] + arr.Up[0][2],
+                arr.Back[1][2] + arr.Up[1][1] + arr.Up[1][2],
+                arr.Back[0][2] + arr.Up[2][1] + arr.Up[2][2]
+              ]
+  }
 }
 
 function turn_front_up(arr) {
