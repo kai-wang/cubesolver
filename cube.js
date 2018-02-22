@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const Graph = require('graphlib').Graph;
-const g = new Graph();
+const g = new Graph({directed: true});
 
 const colors = {
   B: "Blue",
@@ -308,18 +308,18 @@ const laws = {
       return rotate_up_to_right(arr);
     }
   },
-  "BL": {
-    alias: 'BL',
+  "TL": {
+    alias: 'TL',
     instruction: 'rotate bottm side to left',
-    reverse: 'BR',
+    reverse: 'TR',
     transform: function(arr) {
       return rotate_bottom_to_left(arr);
     }
   },
-  "BR": {
-    alias: 'BR',
+  "TR": {
+    alias: 'TR',
     instruction: 'rotate bottom side to right',
-    reverse: 'BL',
+    reverse: 'TL',
     transform: function(arr) {
       return rotate_bottom_to_right(arr);
     }
@@ -408,15 +408,48 @@ function test() {
     "Right": ['OOW', 'BYW', 'BYY'],
     "Up": ['WGO', 'GBG', 'GWY'],
     "Bottom": ['RGY', 'BGO', 'YWO']
-  }
-  _.map(_.values(laws), v => {
-    console.log(v.instruction);
+  };
+  _.mapKeys(laws, (v, k) => {
+    console.log("alias: " + k + ": " + v.instruction);
+    // must able to reverse transformable.
     var ss = laws[v.reverse].transform(v.transform(start));
-    assert(toString(ss) == toString(start));
+    assert(hash(ss) == hash(start));
   })
-
 }
 
-function toString(arr) {
+function normalize(arr) {
+  return _.transform(surfaces, (result, v) => { result[v] = arr[v]; }, {});
+}
+
+function hash(arr) {
   return _.join(_.flatten(_.values(arr)), "");
 }
+
+function findSolution() {
+  const arr = {
+    "Front": ['ORG', 'BRO', 'BRR'],
+    "Back": ['BWG', 'BOY', 'BOG'],
+    "Left": ['RYW', 'RWY', 'RRW'],
+    "Right": ['OOW', 'BYW', 'BYY'],
+    "Up": ['WGO', 'GBG', 'GWY'],
+    "Bottom": ['RGY', 'BGO', 'YWO']
+  };
+
+  var m = normalize(arr);
+  var src = hash(m);
+
+  g.setNode(src, m);
+  var result = _.transform(laws, (result, v, k) => {
+    var t = v.transform(m);
+    var dest = hash(t);
+    result.push({ [dest]: t });
+
+    if(!g.hasNode(dest))
+      g.setNode(dest, t);
+
+    g.setEdge(src, dest, v.alias);
+    g.setEdge(dest, src, v.reverse);
+
+  }, []);
+
+} 
