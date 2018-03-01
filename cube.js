@@ -1,7 +1,8 @@
 'use restrict'
 
 const _ = require('lodash');
-const Graph = require('graphlib').Graph;
+const graphlib = require('graphlib');
+const Graph = graphlib.Graph;
 const g = new Graph({directed: true});
 
 const colors = {
@@ -426,6 +427,7 @@ function hash(arr) {
 }
 
 function findSolution() {
+  /*
   const arr = {
     "Front": ['ORG', 'BRO', 'BRR'],
     "Back": ['BWG', 'BOY', 'BOG'],
@@ -435,21 +437,76 @@ function findSolution() {
     "Bottom": ['RGY', 'BGO', 'YWO']
   };
 
-  var m = normalize(arr);
-  var src = hash(m);
+  const target = {
+    "Front": ['RRR', 'RRR', 'RRR'],
+    "Back": ['OOO', 'OOO', 'OOO'],
+    "Left": ['WWW', 'WWW', 'WWW'],
+    "Right": ['YYY', 'YYY', 'YYY'],
+    "Up": ['BBB', 'BBB', 'BBB'],
+    "Bottom": ['GGG', 'GGG', 'GGG']  
+  };
+  */
 
-  g.setNode(src, m);
-  var result = _.transform(laws, (result, v, k) => {
-    var t = v.transform(m);
-    var dest = hash(t);
-    result.push({ [dest]: t });
+  const target = {
+    "Front": ['RRR', 'RRR', 'RRR'],
+    "Back": ['OOO', 'OOO', 'OOO'],
+    "Left": ['WWW', 'WWW', 'WWW'],
+    "Right": ['YYY', 'YYY', 'YYY'],
+    "Up": ['BBB', 'BBB', 'BBB'],
+    "Bottom": ['GGG', 'GGG', 'GGG']  
+  };
 
-    if(!g.hasNode(dest))
-      g.setNode(dest, t);
+  const arr = {
+    Front: [ 'YYY', 'RRR', 'RRR' ],
+    Back: [ 'WWW', 'OOO', 'OOO' ],
+    Left: [ 'RRR', 'WWW', 'WWW' ],
+    Right: [ 'OOO', 'YYY', 'YYY' ],
+    Up: [ 'BBB', 'BBB', 'BBB' ],
+    Bottom: [ 'GGG', 'GGG', 'GGG' ] 
+  };
 
-    g.setEdge(src, dest, v.alias);
-    g.setEdge(dest, src, v.reverse);
+  var targetHash = hash(normalize(target));
 
-  }, []);
+  var src = normalize(arr);
+  var srcHash = hash(normalize(src));
 
-} 
+  var pool = [src];
+  var found = false;
+
+  function transform(shape, base) {
+    _.map(laws, (v, k) => {
+      if(g.outEdges(base).length < 12 && !found) {
+        var t = v.transform(shape);
+        var dest = hash(t);
+        if(dest == targetHash) {
+          pool = [];
+          g.setNode(dest, t);
+          g.setEdge(base, dest, v.alias);
+          g.setEdge(dest, base, v.reverse);
+          found = true;
+          return;
+        }
+  
+        if(!g.hasNode(dest)) {
+          g.setNode(dest, t);
+        }
+  
+        if(!g.hasEdge(base, dest)) {
+          g.setEdge(base, dest, v.alias);
+          g.setEdge(dest, base, v.reverse);
+          pool.push(t); 
+        }
+      }
+    })
+  }
+
+  g.setNode(srcHash, src);
+
+  while(!found) {
+    var tmp = pool.shift();
+    transform(tmp, hash(tmp));
+  }
+
+  console.log(graphlib.alg.dijkstra(g, srcHash, e => g.edge(e)));
+}
+
